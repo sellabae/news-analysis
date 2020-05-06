@@ -1,0 +1,21 @@
+#웹크롤링 소스 코드 (1)
+install.packages('rvest')
+library(rvest)
+
+#Target url = https://nsearch.chosun.com/search/total.search?query=%EC%BD%94%EB%A1%9C%EB%82%98&sort=1&pn=3
+#조선일보 최신 코로나 관련기사 아무거나 불러옴.
+
+url<- "https://news.chosun.com/site/data/html_dir/2020/05/06/2020050604797.html"
+ch <- read_html(url)
+ch
+
+#제목만 뽑아냄
+chs <- html_nodes(ch, "h1#news_title_text_id")
+chs
+
+#기사 제목을 텍스트 파일로 만듬
+title<- html_text(chs)
+title
+
+# txt파일 저장
+write(title, "ch.txt")
