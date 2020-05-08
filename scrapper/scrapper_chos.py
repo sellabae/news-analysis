@@ -1,12 +1,27 @@
+# -*- coding: UTF-8 -*-
+#  조선일보 news.chosun.com 전체기사 코너 날짜별 기사제목 크롤러
+
 import requests
 from bs4 import BeautifulSoup
 import lxml
 
 import os
+import sys
 import datetime as dt
 from datetime import datetime
 import pandas as pd
 import re
+
+#프로그램 실행부
+args = sys.argv
+if len(args) < 3:
+    print('Use: -.py [yyyy-mm-dd] [days]')
+    sys.exit()
+startdate_str = args[1]
+days = int(args[2])
+
+# 스크래핑 --------------------------------------------------------
+print('조선일보 기사 제목 스크래퍼')
 
 # local time
 print('local', datetime.now())
@@ -14,6 +29,7 @@ print('local', datetime.now())
 KST = dt.timezone(dt.timedelta(hours=9)) #korean timezone utc+9
 now = datetime.now(tz=KST)
 print('korea', now)
+print()
 
 # 저장될 데이터프레임 준비
 cols = ['date','category','title','link','author']
@@ -107,6 +123,4 @@ def chos_get_articles_days(startdate, days=7, verbose=1):
 
 
 # 스크래퍼 실행
-# chos_get_articles_oneday(datetime.strptime('2020-04-27','%Y-%m-%d'), verbose=0)
-chos_get_articles_days(datetime.strptime('2020-04-27','%Y-%m-%d'), days=7, verbose=0)
-# chos_get_articles_days(datetime.strptime('2020-05-04','%Y-%m-%d'), days=7, verbose=0)
+chos_get_articles_days(datetime.strptime(startdate_str,'%Y-%m-%d'), days=days, verbose=0)
