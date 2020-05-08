@@ -11,25 +11,35 @@ from datetime import datetime
 import pandas as pd
 import re
 
+# 스크래핑 --------------------------------------------------------
+print('한겨레 기사 제목 스크래퍼')
+
 # local time
 print('local', datetime.now())
 # 현재 한국 시간
 KST = dt.timezone(dt.timedelta(hours=9)) #korean timezone utc+9
 now = datetime.now(tz=KST)
 print('korea', now)
+print()
 
 # 저장될 데이터프레임 준비
 cols = ['date','category','title','link','author']
 # df = pd.DataFrame(columns=cols)
 
 # 저장될 폴더&파일 준비
-dirpath = 'scrapped/'
+dirpath = 'scrapped/hani/'
 if not os.path.exists(dirpath):
     os.makedirs(dirpath)
-fpath = dirpath + 'articles_hani_{0}.csv'.format(now.strftime('%Y-%m-%d_%H:%M:%S'))
+fpath = dirpath + 'hani_scrapped_at_{0}.csv'.format(now.strftime('%Y-%m-%d_%H:%M:%S'))
 with open(fpath, 'w') as f:
     f.write(','.join(cols) + '\n')
 
+
+selector_hani = {'article':'div.article-area',
+                 'title':'.article-title a',
+                 'category':'.category a',
+                 'date':'.date',
+                 'author':None}
 
 # 한겨레 현재시간 전체기사 base url
 home_url = "http://www.hani.co.kr"
@@ -68,9 +78,3 @@ for i in range(30):
     df = get_articles_hani(base_url + end_url)
     df.to_csv(fpath, mode='a', header=False, index=False)
 
-
-selector_hani = {'article':'div.article-area',
-                 'title':'.article-title a',
-                 'category':'.category a',
-                 'date':'.date',
-                 'author':None}
