@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 #  한겨레 hani.co.kr 전체기사 코너(날짜구분없이 최신뉴스 순서대로) 기사제목 크롤러
 
 import requests
