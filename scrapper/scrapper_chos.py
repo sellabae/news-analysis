@@ -17,8 +17,8 @@ args = sys.argv
 if len(args) < 3:
     print('Use: -.py [yyyy-mm-dd] [days]')
     sys.exit()
-startdate_str = args[1]
-days = int(args[2])
+arg_startdate = args[1]
+arg_days = int(args[2])
 
 # 스크래핑 --------------------------------------------------------
 print('조선일보 기사 제목 스크래퍼')
@@ -29,10 +29,9 @@ print('local', datetime.now())
 KST = dt.timezone(dt.timedelta(hours=9)) #korean timezone utc+9
 now = datetime.now(tz=KST)
 print('korea', now)
-print()
 
 # 저장될 데이터프레임 준비
-cols = ['date','category','title','link','author']
+cols = ['date','category','title','author','link','desc']
 
 # 저장될 폴더 준비
 dirpath = 'scrapped/chosun/'
@@ -43,10 +42,11 @@ selector_chos = {'article':'dl.list_item',
                  'title':'dt a',
                  'category':None,
                  'date':'.date',
-                 'author':'.author'}
+                 'author':'.author',
+                 'desc':'.desc'}
 
 
-# 한 페이지에 있는 기사들 가져오기
+# 한 페이지 스크랩, return dataframe
 def get_articles_chos(url, selector, verbose=1):
     # Gets page
     res = requests.get(url)
@@ -55,7 +55,7 @@ def get_articles_chos(url, selector, verbose=1):
         print('Request fails. url:', url)
         return None
     
-    if verbose > 0 : print('Getting articles from', url) #print this page
+    if verbose > 0 : print('Getting articles from', url) #show page url
     df = pd.DataFrame(columns=cols)
     soup = BeautifulSoup(res.text, 'lxml')
     
@@ -65,26 +65,29 @@ def get_articles_chos(url, selector, verbose=1):
         at = article.select(selector['title'])[0]
         link = "https:" + at.get('href')                            #기사링크
         title = at.text                                             #제목
-#         category = article.select(selector['category'])[0].text   #분류
+        category = ''                                               #분류
         datestr = article.select(selector['date'])[0].text
         datestr = re.sub("\s\(\w*\)$", "", datestr)
         date = datetime.strptime(datestr, '%Y.%m.%d')               #날짜
         try:
-            author = article.select(selector['author'])[0].text         #작성자
-            author = author.replace('\n','').strip().replace(' 기자','') #문자열 정리
+            author = article.select(selector['author'])[0].text     #작성자
+            author = author.replace('\n','').strip()
         except:
             author = ''
+        desc = article.select(selector['desc'])[0].text             #짧은설명
         #add all to dataframe
-        df.loc[len(df)] = [date,'',title,link,author]
-        if verbose > 2: print('','',title,link,author) #print this row
+        row = [date,category,title,author,link,desc]
+        df.loc[len(df)] = row
+        if verbose >= 2: print(' ',title) #print this row
         
     return df
 
 
-# 해당일 전체기사 가져오기
+# 특정 날짜의 '전체기사' 코너의 기사 모두 가져오기
 def chos_get_articles_oneday(date, verbose=1):
+    # 유효한 날짜인지 확인
     if date.date() >= now.replace(tzinfo=None).date():
-        print("Not {0} yet.".format(date.date()))
+        print("Not valid date {0}".format(date.date()))
         return
     
     print('\nGet all articles on the day', date.date())
@@ -94,6 +97,7 @@ def chos_get_articles_oneday(date, verbose=1):
     base_url = "https://news.chosun.com/svc/list_in/list.html?indate={0}".format(datestr)
     print('BaseURL:', base_url)
     
+    # 파일 생성후 컬럼 이름 출력
     fpath = dirpath + 'chos_{0}.csv'.format(datestr)
     with open(fpath, 'w') as f:
         f.write(','.join(cols) + '\n')
@@ -123,4 +127,4 @@ def chos_get_articles_days(startdate, days=7, verbose=1):
 
 
 # 스크래퍼 실행
-chos_get_articles_days(datetime.strptime(startdate_str,'%Y-%m-%d'), days=days, verbose=0)
+chos_get_articles_days(datetime.strptime(arg_startdate,'%Y-%m-%d'), days=arg_days, verbose=0)

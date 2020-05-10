@@ -20,10 +20,9 @@ print('local', datetime.now())
 KST = dt.timezone(dt.timedelta(hours=9)) #korean timezone utc+9
 now = datetime.now(tz=KST)
 print('korea', now)
-print()
 
 # 저장될 데이터프레임 준비
-cols = ['date','category','title','link','author']
+cols = ['date','category','title','author','link','desc']
 # df = pd.DataFrame(columns=cols)
 
 # 저장될 폴더&파일 준비
@@ -35,18 +34,20 @@ with open(fpath, 'w') as f:
     f.write(','.join(cols) + '\n')
 
 
-selector_hani = {'article':'div.article-area',
-                 'title':'.article-title a',
-                 'category':'.category a',
-                 'date':'.date',
-                 'author':None}
+selector = {'article':'div.article-area',
+            'title':'.article-title a',
+            'link':'.article-title a',
+            'category':'.category a',
+            'date':'.date',
+            'author':None,
+            'desc':'.article-prologue a'}
 
 # 한겨레 현재시간 전체기사 base url
 home_url = "http://www.hani.co.kr"
 base_url = "http://www.hani.co.kr/arti/"
 
 # 한 페이지 내 기사목록 스크랩
-def get_articles_hani(url):
+def scrap_one_page(url, verbose=1):
     # Gets page
     res = requests.get(url)
     if not res.ok:
@@ -61,20 +62,31 @@ def get_articles_hani(url):
     article_list = soup.select('div.article-area')
     # Extracts article details
     for article in article_list:
-        at = article.select('.article-title a')[0]
-        link = home_url + at.get('href')
-        title = at.text
-        category = article.select('.category a')[0].text
-        datestr = article.select('.date')[0].text
+        title = article.select(selector['title'])[0].text                   #제목
+        link = home_url + article.select(selector['link'])[0].get('href')   #링크
+        category = article.select(selector['category'])[0].text             #분야
+        datestr = article.select(selector['date'])[0].text                  #날짜
         date = datetime.strptime(datestr, '%Y-%m-%d %H:%M')
+        author = ''                                                         #작성자
+        try:
+            desc = article.select(selector['desc'])[0].text                 #짤은요약글
+        except:
+            desc = ''
         #add all to dataframe
-        df.loc[len(df)] = [date,category,title,link,'']
+        row = [date,category,title,author,link, desc]
+        df.loc[len(df)] = row
+        if verbose == 3: print(' ',title) #print title
         
+    if verbose >= 2: print(len(df), 'articles added')
     return df
 
 # 페이지별 반복
-for i in range(30):
-    end_url = "list{0}.html".format(i+1)
-    df = get_articles_hani(base_url + end_url)
-    df.to_csv(fpath, mode='a', header=False, index=False)
-
+def scrap_all(pagecount, verbose=1):
+    print('\nGetting articles in {0} pages'.format(pagecount))
+    for i in range(pagecount):
+        page_url = base_url + "list{0}.html".format(i+1)
+        df = scrap_one_page(page_url, verbose=verbose)
+        df.to_csv(fpath, mode='a', header=False, index=False)
+    print("\nSaved at", fpath)
+    
+scrap_all(3, verbose=3)
