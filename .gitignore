@@ -2,3 +2,7 @@
 
 #etc.
 .DS_Store
+
+
+#scrapped data
+scrapped/*
