@@ -84,7 +84,7 @@ def scrap_one_page(url, selector, verbose=1):
         desc = article.select(selector['desc'])[0].text   #짤은요약글
         desc = desc.replace('\n',' ')
         author_match = re.findall("\(.{1,4}=.{1,4}\)\s.{1,15}\s=\s", desc) #'(..=..).. = ' 패턴 찾기
-        author = re.desc(" = ", "", author_match[0]) if len(author_match) else ''    #작성자
+        author = re.sub(" = ", "", author_match[0]) if len(author_match) else ''    #작성자
         #add all to dataframe
         row = [date,category,title,author,link,desc]
         df.loc[len(df)] = row
@@ -123,4 +123,4 @@ def scrap_articles_all_cat(verbose=1, page_limit=10):
 
 
 # Run the program
-scrap_articles_all_cat(page_limit=0)
+scrap_articles_all_cat(page_limit=3)
