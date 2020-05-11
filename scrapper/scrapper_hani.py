@@ -29,7 +29,7 @@ cols = ['date','category','title','author','link','desc']
 dirpath = 'scrapped/hani/'
 if not os.path.exists(dirpath):
     os.makedirs(dirpath)
-fpath = dirpath + 'hani_scrapped_at_{0}.csv'.format(now.strftime('%Y-%m-%d_%H:%M:%S'))
+fpath = dirpath + 'hani_{0}.csv'.format(now.strftime('%Y-%m-%d_%H:%M:%S'))
 with open(fpath, 'w') as f:
     f.write(','.join(cols) + '\n')
 
