@@ -111,7 +111,7 @@ def scrap_articles_by_cat(category, verbose=1, page_limit=10):
         df['category'] = cat_ko
         df.to_csv(fpath, mode='a', header=False, index=False)
         i += 1
-    print("Chekced "+i+" pages")
+    print("Chekced "+str(i)+" pages")
 
 
 # 모든 카테고리에서 '전체기사'코너의 모든 기사 스크랩
