@@ -56,7 +56,7 @@ dirpath = 'scrapped/yna/'
 if not os.path.exists(dirpath):
     os.makedirs(dirpath)
 # 저장할 파일 준비
-fpath = dirpath + 'yna_{0}.csv'.format(now.strftime('%Y%m%d_%H:%M:%S'))
+fpath = dirpath + 'yna_{0}.csv'.format(now.strftime('%m%d_%H:%M:%S'))
 with open(fpath, 'w') as f:
     f.write(','.join(cols) + '\n')
 
