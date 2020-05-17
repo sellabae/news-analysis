@@ -6,3 +6,6 @@
 #scrapped data
 scrapped/
 hidden/
+
+#R related
+.Rhistory
